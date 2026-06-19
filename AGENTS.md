@@ -1,5 +1,7 @@
 # Calcifer — Agent Guide
 
+> This file is a living document. Keep it updated whenever a context, architectural, or conventional decision is made, so future sessions and agents stay aligned.
+
 ## Architecture
 
 Hexagonal Architecture (Ports & Adapters) with strict Dependency Inversion:
