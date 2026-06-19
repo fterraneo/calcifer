@@ -1,41 +1,71 @@
-# Bank Statement Report — Implementation Plan
+# Bank Statement — Feature Plans
 
-**Goal:** Parse a home banking Excel file and print a shell report summing transaction amounts by category (both income and expenses).
+## Feature 1: Category Summary Report ✅ COMPLETE
 
-## Context
+Parse `export.xlsx` and print a shell report summing transactions by category.
 
-**Excel file:** `export.xlsx` (project root), sheet `Lista Operazione`.  
-Header row at index 18: `Data | Operazione | Dettagli | Conto o carta | Contabilizzazione | Categoria | Valuta | Importo`  
-Data rows start at index 19. Date is an Excel serial number; amounts are floats (negative = expense, positive = income).
+**Port introduced:** `LoadTransactionsPort` (output) — `load(): Promise<Transaction[]>`  
+**Adapters:** `ExcelTransactionLoader` (production), `InMemoryTransactionLoader` (tests)
 
-## Architecture Decisions
+---
+
+## Feature 2: Upload Transactions to Google Sheets
+
+**Goal:** Upload the list of parsed transactions to a Google Sheet.  
+**Columns:** Date, Description, Details, Amount, Category  
+**Behaviour:** Clear the sheet and rewrite all rows on every run.  
+**Auth:** Service account (JSON key file at project root, shared with the target spreadsheet).
+
+### Domain model change: add `details` to `Transaction`
+
+The current `Transaction` model is missing the `details` field (Excel column "Dettagli", index 2).  
+This must be added first — it is a prerequisite for all steps below.  
+Required updates: `Transaction.ts`, `ExcelTransactionLoader.ts`, all tests that construct `Transaction`.
 
 ### Port introduced
 
-**`LoadTransactionsPort`** (output/driven port) — `core/domain/ports/`
+**`SaveTransactionsPort`** (output/driven port) — `core/domain/ports/`
 ```ts
-interface LoadTransactionsPort {
-  load(): Promise<Transaction[]>
+interface SaveTransactionsPort {
+  save(transactions: Transaction[]): Promise<void>;
 }
 ```
-
-The domain defines what it needs from infrastructure; it does not know about Excel.
+The application defines *what* it needs (save a list of transactions); it does not know about Sheets or HTTP.
 
 Implementations:
-- `ExcelTransactionLoader` — `infrastructure/adapters/out/` — parses the xlsx file (file path hardcoded)
-- `InMemoryTransactionLoader` — `infrastructure/adapters/out/` — seeded list, used in tests
+- `GoogleSheetsTransactionWriter` — `infrastructure/adapters/out/` — calls the Sheets API; clears the range and rewrites header + rows
+- `InMemoryTransactionWriter` — `infrastructure/adapters/out/` — stores transactions in memory; used in tests
 
-**No output port for printing.** `BankStatementService` returns `CategorySummary[]`; `main.ts` renders the table. Printing is presentation logic, not application logic.
+### Application service
 
-## Steps
+**`TransactionUploadService`** — `core/application/`
+```ts
+class TransactionUploadService {
+  constructor(
+    private readonly load: LoadTransactionsPort,
+    private readonly save: SaveTransactionsPort,
+  ) {}
+  async upload(): Promise<void> { ... }
+}
+```
+Loads via `LoadTransactionsPort`, saves via `SaveTransactionsPort`. No Google Sheets knowledge.
 
-Each step is one atomic, shippable commit.
+### Google Sheets setup (manual prerequisite for the user)
 
-- [x] Domain models: `Transaction`, `CategorySummary` — `core/domain/model/`
-- [x] Port: `LoadTransactionsPort` — `core/domain/ports/`
-- [x] `BankStatementService` + colocated unit test (testdouble mock) — `core/application/`
-- [x] `InMemoryTransactionLoader` + acceptance test (`tests/acceptance/bank-statement.test.ts`)
-- [x] `ExcelTransactionLoader` — parses xlsx using the `xlsx` library
-- [x] Wire `main.ts`, move `xlsx` from devDependencies → dependencies
+Before running, you need to:
+1. Create a [Google Cloud project](https://console.cloud.google.com/) and enable the **Google Sheets API**.
+2. Create a **Service Account**, generate a JSON key, and save it as `service-account.json` in the project root.
+3. Share the target Google Sheet with the service account email (Editor access).
+4. The spreadsheet ID and sheet/tab name are hardcoded in `GoogleSheetsTransactionWriter`.
 
-Check off each step (`[x]`) as it is completed.
+`service-account.json` is listed in `.gitignore` — never commit it.
+
+### Steps (each a shippable commit)
+
+- [ ] Add `details` field to `Transaction`, update `ExcelTransactionLoader` and all affected tests
+- [ ] Add `SaveTransactionsPort` — `core/domain/ports/`
+- [ ] `TransactionUploadService` + colocated unit test (testdouble mock)
+- [ ] `InMemoryTransactionWriter` + acceptance test
+- [ ] `GoogleSheetsTransactionWriter` adapter (uses `googleapis`)
+- [ ] Wire `main.ts`, add `googleapis` dependency, update `.gitignore`
+
