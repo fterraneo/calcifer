@@ -31,11 +31,11 @@ Implementations:
 
 Each step is one atomic, shippable commit.
 
-- [ ] Domain models: `Transaction`, `CategorySummary` — `core/domain/model/`
-- [ ] Port: `LoadTransactionsPort` — `core/domain/ports/`
-- [ ] `BankStatementService` + colocated unit test (testdouble mock) — `core/application/`
-- [ ] `InMemoryTransactionLoader` + acceptance test (`tests/acceptance/bank-statement.test.ts`)
-- [ ] `ExcelTransactionLoader` — parses xlsx using the `xlsx` library
-- [ ] Wire `main.ts`, move `xlsx` from devDependencies → dependencies
+- [x] Domain models: `Transaction`, `CategorySummary` — `core/domain/model/`
+- [x] Port: `LoadTransactionsPort` — `core/domain/ports/`
+- [x] `BankStatementService` + colocated unit test (testdouble mock) — `core/application/`
+- [x] `InMemoryTransactionLoader` + acceptance test (`tests/acceptance/bank-statement.test.ts`)
+- [x] `ExcelTransactionLoader` — parses xlsx using the `xlsx` library
+- [x] Wire `main.ts`, move `xlsx` from devDependencies → dependencies
 
 Check off each step (`[x]`) as it is completed.
