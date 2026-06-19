@@ -46,7 +46,7 @@ npm run lint         # Type-check only (no emit)
 ## Git
 
 - Author for commits: `f.terraneo <f.terraneo@hotmail.com>`
-- Co-author: `opencode/big-pickle <opencode@opencode.ai>`
+- Co-author: Use the current agent/model ID, e.g. `opencode/big-pickle <opencode@opencode.ai>` — replace `big-pickle` with whichever model is assisting
 - Always use both in every commit via `--author` flag and `Co-authored-by:` trailer in the message.
 
 ## Conventions
