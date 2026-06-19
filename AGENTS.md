@@ -42,7 +42,7 @@ npm run lint         # Type-check only (no emit)
 ## Testing
 
 - **Acceptance tests** (`tests/acceptance/`): Full use case flow via in-memory adapters. Write these first.
-- **Unit tests** (`tests/unit/`): Test services in isolation. Use `testdouble` for mocking ports.
+- **Unit tests** (colocated `*.test.ts`): Test services in isolation. Use `testdouble` for mocking ports.
 - Never import infrastructure (DB, HTTP, etc.) into tests/acceptance — only in-memory adapters.
 
 ## Git
