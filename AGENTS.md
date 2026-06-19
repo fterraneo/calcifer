@@ -43,6 +43,12 @@ npm run lint         # Type-check only (no emit)
 - **Unit tests** (`tests/unit/`): Test services in isolation. Use `testdouble` for mocking ports.
 - Never import infrastructure (DB, HTTP, etc.) into tests/acceptance — only in-memory adapters.
 
+## Git
+
+- Author for commits: `f.terraneo <f.terraneo@hotmail.com>`
+- Co-author: `opencode/big-pickle <opencode@opencode.ai>`
+- Always use both in every commit via `--author` flag and `Co-authored-by:` trailer in the message.
+
 ## Conventions
 
 - Domain models: plain objects or simple classes, no decorators, no framework dependencies.
