@@ -1,1 +1,0 @@
-export { HelloWorldService } from './HelloWorldService';

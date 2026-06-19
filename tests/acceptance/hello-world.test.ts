@@ -1,5 +1,5 @@
-import { HelloWorldService } from '../../src/core/application';
-import { InMemoryGreetingRepository } from '../../src/infrastructure/adapters/out';
+import { HelloWorldService } from '../../src/core/application/HelloWorldService';
+import { InMemoryGreetingRepository } from '../../src/infrastructure/adapters/out/InMemoryGreetingRepository';
 
 describe('Hello World — Acceptance', () => {
   let service: HelloWorldService;

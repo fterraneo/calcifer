@@ -1,1 +1,0 @@
-export { InMemoryGreetingRepository } from './InMemoryGreetingRepository';

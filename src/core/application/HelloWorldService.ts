@@ -1,4 +1,5 @@
-import { Greeting, GreetingRepository } from '../domain';
+import { Greeting } from '../domain/model/Greeting';
+import { GreetingRepository } from '../domain/ports/GreetingRepository';
 
 export class HelloWorldService {
   constructor(private readonly greetingRepository: GreetingRepository) {}

@@ -1,1 +1,0 @@
-export { GreetingRepository } from './GreetingRepository';

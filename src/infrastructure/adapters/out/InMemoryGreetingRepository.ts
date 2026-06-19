@@ -1,4 +1,5 @@
-import { Greeting, GreetingRepository } from '../../../core/domain';
+import { Greeting } from '../../../core/domain/model/Greeting';
+import { GreetingRepository } from '../../../core/domain/ports/GreetingRepository';
 
 export class InMemoryGreetingRepository implements GreetingRepository {
   private storage: Greeting[] = [];
