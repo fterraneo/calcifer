@@ -1,0 +1,52 @@
+# Calcifer — Agent Guide
+
+## Architecture
+
+Hexagonal Architecture (Ports & Adapters) with strict Dependency Inversion:
+
+```
+src/
+  core/
+    domain/
+      model/     # Pure domain entities/value objects (zero dependencies)
+      ports/     # Interfaces defining boundaries (input & output ports)
+    application/ # Use cases / application services (depend only on domain ports)
+  infrastructure/
+    adapters/
+      in/        # Inbound adapters (controllers, CLI, etc.)
+      out/       # Outbound adapters (repositories, APIs, etc.)
+tests/
+  acceptance/    # "Large" outside-in tests — use in-memory adapters
+  unit/          # Unit tests — mock ports with testdouble
+```
+
+## Principles
+
+- **Hexagonal Architecture**: Core domain has zero infrastructure dependencies.
+- **Dependency Inversion**: Core defines interfaces; adapters implement them.
+- **SOLID**: Single responsibility, Open/Closed, Liskov, Interface Segregation, Dependency Inversion.
+- **KISS**: Keep it simple — no premature abstractions.
+- **Outside-In TDD**: Start with acceptance test → implement use case → stitch adapters.
+
+## Development
+
+```bash
+npm run build        # TypeScript compile
+npm test             # Run all tests
+npm run test:watch   # Watch mode
+npm run lint         # Type-check only (no emit)
+```
+
+## Testing
+
+- **Acceptance tests** (`tests/acceptance/`): Full use case flow via in-memory adapters. Write these first.
+- **Unit tests** (`tests/unit/`): Test services in isolation. Use `testdouble` for mocking ports.
+- Never import infrastructure (DB, HTTP, etc.) into tests/acceptance — only in-memory adapters.
+
+## Conventions
+
+- Domain models: plain objects or simple classes, no decorators, no framework dependencies.
+- Port interfaces: prefixed by role, e.g. `SaveGreetingPort`, `LoadGreetingPort`.
+- Services: stateless, dependencies injected via constructor.
+- Adapters: named by technology, e.g. `InMemoryGreetingRepository`, `PostgresGreetingRepository`.
+- Barrel files (`index.ts`) at each layer for clean imports.

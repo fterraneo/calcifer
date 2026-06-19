@@ -1,0 +1,1 @@
+export { GreetingRepository } from './GreetingRepository';
