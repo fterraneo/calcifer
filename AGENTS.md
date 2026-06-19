@@ -57,4 +57,4 @@ npm run lint         # Type-check only (no emit)
 - Port interfaces: prefixed by role, e.g. `SaveGreetingPort`, `LoadGreetingPort`.
 - Services: stateless, dependencies injected via constructor.
 - Adapters: named by technology, e.g. `InMemoryGreetingRepository`, `PostgresGreetingRepository`.
-- Barrel files (`index.ts`) at each layer for clean imports.
+
