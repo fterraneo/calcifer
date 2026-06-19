@@ -1,7 +1,7 @@
 import * as td from 'testdouble';
-import { Greeting } from '../../src/core/domain/model/Greeting';
-import { GreetingRepository } from '../../src/core/domain/ports/GreetingRepository';
-import { HelloWorldService } from '../../src/core/application/HelloWorldService';
+import { Greeting } from '../domain/model/Greeting';
+import { GreetingRepository } from '../domain/ports/GreetingRepository';
+import { HelloWorldService } from './HelloWorldService';
 
 describe('HelloWorldService — Unit', () => {
   let mockRepo: GreetingRepository;

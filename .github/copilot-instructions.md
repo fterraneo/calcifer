@@ -30,6 +30,7 @@ src/
       model/           # Pure domain entities/value objects (zero dependencies)
       ports/           # Interfaces defining boundaries (input & output ports)
     application/       # Use cases / application services (depend only on domain ports)
+      *.test.ts        # Unit tests colocated with source
   infrastructure/
     adapters/
       in/              # Inbound adapters (controllers, CLI, etc.)
@@ -37,7 +38,6 @@ src/
 
 tests/
   acceptance/          # Outside-in tests using in-memory adapters
-  unit/                # Unit tests with mocked ports (testdouble)
 ```
 
 **Key principles:**
@@ -72,15 +72,16 @@ tests/
 
 ### Testing
 
+**Unit tests** (`*.test.ts` colocated with source):
+- Test services in isolation
+- Mock ports using `testdouble` (not hand-written mocks)
+- Verify interactions with dependencies
+- Located alongside their source file (e.g., `src/core/application/HelloWorldService.test.ts`)
+
 **Acceptance tests** (`tests/acceptance/`):
 - Test full use cases end-to-end
 - Use in-memory adapters, never real infrastructure
 - Write these first (Outside-In TDD)
-
-**Unit tests** (`tests/unit/`):
-- Test services in isolation
-- Mock ports using `testdouble` (not hand-written mocks)
-- Verify interactions with dependencies
 
 **Example unit test with testdouble:**
 ```typescript

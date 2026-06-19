@@ -2,10 +2,10 @@
 const config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/tests'],
+  testMatch: ['**/*.test.ts', '**/tests/**/*.test.ts'],
   verbose: true,
   clearMocks: true,
-  collectCoverageFrom: ['src/**/*.ts'],
+  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.test.ts'],
 };
 
 module.exports = config;
