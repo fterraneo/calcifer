@@ -27,11 +27,21 @@ export class ExcelTransactionLoader implements LoadTransactionsPort {
   async load(): Promise<Transaction[]> {
     const workbook = XLSX.readFile(FILE_PATH);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+    // The bank's export sets an incorrect <dimension> in the worksheet (e.g. A1:J33),
+    // causing sheet_to_json to stop early. Expand !ref to the actual cell extent first.
+    const actualMaxRow = Math.max(
+      ...Object.keys(sheet)
+        .filter((k) => !k.startsWith('!'))
+        .map((k) => XLSX.utils.decode_cell(k).r),
+    );
+    const currentRange = XLSX.utils.decode_range(sheet['!ref']!);
+    sheet['!ref'] = XLSX.utils.encode_range({ s: currentRange.s, e: { ...currentRange.e, r: actualMaxRow } });
+
     const rows: unknown[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
 
     const transactions: Transaction[] = [];
     const failures: ImportFailure[] = [];
-
     rows.slice(DATA_START_INDEX).forEach((row, index) => {
       const rowIndex = DATA_START_INDEX + index + 1;
       try {
@@ -56,6 +66,7 @@ export class ExcelTransactionLoader implements LoadTransactionsPort {
     });
 
     await this.failureReporter.report(failures);
+    console.log('transactions', transactions.length);
     return transactions;
   }
 }
