@@ -62,10 +62,10 @@ Before running, you need to:
 
 ### Steps (each a shippable commit)
 
-- [ ] Add `details` field to `Transaction`, update `ExcelTransactionLoader` and all affected tests
-- [ ] Add `SaveTransactionsPort` — `core/domain/ports/`
-- [ ] `TransactionUploadService` + colocated unit test (testdouble mock)
-- [ ] `InMemoryTransactionWriter` + acceptance test
-- [ ] `GoogleSheetsTransactionWriter` adapter (uses `googleapis`)
-- [ ] Wire `main.ts`, add `googleapis` dependency, update `.gitignore`
+- [x] Add `details` field to `Transaction`, update `ExcelTransactionLoader` and all affected tests
+- [x] Add `SaveTransactionsPort` — `core/domain/ports/`
+- [x] `TransactionUploadService` + colocated unit test (testdouble mock)
+- [x] `InMemoryTransactionWriter` + acceptance test
+- [x] `GoogleSheetsTransactionWriter` adapter (uses `googleapis`)
+- [x] Wire `main.ts`, add `googleapis` dependency, update `.gitignore`
 
