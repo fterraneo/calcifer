@@ -9,13 +9,18 @@ const KEY_FILE = path.resolve(process.cwd(), 'service-account.json');
 
 const HEADER = ['Date', 'Description', 'Details', 'Amount', 'Category'];
 
-const DATE_FORMAT = { type: 'DATE', pattern: 'YYYY-MM-DD' };
+// DATE pattern - Google Sheets date format syntax (lowercase required)
+const DATE_FORMAT = { type: 'DATE', pattern: 'yyyy-mm-dd' };
+
+// Accounting pattern without embedded currency symbol — matches Google Sheets' built-in
+// "Accounting" preset (currency symbol is derived from the spreadsheet locale)
 const ACCOUNTING_FORMAT = {
   type: 'NUMBER',
-  pattern: '_(€* #,##0.00_);_(€* (#,##0.00);_(€* "-"??_);_(@_)',
+  pattern: '_(* #,##0.00_);_(* (#,##0.00);_(* "-"??_);_(@_)',
 };
 
 function toSheetsSerial(date: Date): number {
+  // Days since 1899-12-30 (Google Sheets epoch)
   return Math.floor(date.getTime() / 86400000) + 25569;
 }
 
@@ -27,51 +32,53 @@ export class GoogleSheetsTransactionWriter implements SaveTransactionsPort {
     });
 
     const sheets = google.sheets({ version: 'v4', auth });
-    const range = `${SHEET_NAME}!A1`;
-
-    const rows = transactions.map((tx) => [
-      toSheetsSerial(tx.date),
-      tx.description,
-      tx.details,
-      tx.amount,
-      tx.category,
-    ]);
-
-    await sheets.spreadsheets.values.clear({
-      spreadsheetId: SPREADSHEET_ID,
-      range: SHEET_NAME,
-    });
-
-    await sheets.spreadsheets.values.update({
-      spreadsheetId: SPREADSHEET_ID,
-      range,
-      valueInputOption: 'RAW',
-      requestBody: { values: [HEADER, ...rows] },
-    });
 
     const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
-    const sheet = spreadsheet.data.sheets?.find(
+    const sheetMeta = spreadsheet.data.sheets?.find(
       (s) => s.properties?.title === SHEET_NAME,
     );
-    const sheetId = sheet?.properties?.sheetId ?? 0;
-    const dataRowCount = transactions.length + 1; // +1 for header
+    if (sheetMeta?.properties?.sheetId == null) {
+      throw new Error(`Sheet "${SHEET_NAME}" not found in spreadsheet`);
+    }
+    const sheetId = sheetMeta.properties.sheetId;
+
+    const headerRow = {
+      values: HEADER.map((h) => ({ userEnteredValue: { stringValue: h } })),
+    };
+
+    const dataRows = transactions.map((tx) => ({
+      values: [
+        {
+          userEnteredValue: { numberValue: toSheetsSerial(tx.date) },
+          userEnteredFormat: { numberFormat: DATE_FORMAT },
+        },
+        { userEnteredValue: { stringValue: tx.description } },
+        { userEnteredValue: { stringValue: tx.details } },
+        {
+          userEnteredValue: { numberValue: tx.amount },
+          userEnteredFormat: { numberFormat: ACCOUNTING_FORMAT },
+        },
+        { userEnteredValue: { stringValue: tx.category } },
+      ],
+    }));
 
     await sheets.spreadsheets.batchUpdate({
       spreadsheetId: SPREADSHEET_ID,
       requestBody: {
         requests: [
+          // Clear all existing content and formatting
           {
-            repeatCell: {
-              range: { sheetId, startRowIndex: 1, endRowIndex: dataRowCount, startColumnIndex: 0, endColumnIndex: 1 },
-              cell: { userEnteredFormat: { numberFormat: DATE_FORMAT } },
-              fields: 'userEnteredFormat.numberFormat',
+            updateCells: {
+              range: { sheetId },
+              fields: 'userEnteredValue,userEnteredFormat',
             },
           },
+          // Write header + data rows with values and formats in one shot
           {
-            repeatCell: {
-              range: { sheetId, startRowIndex: 1, endRowIndex: dataRowCount, startColumnIndex: 3, endColumnIndex: 4 },
-              cell: { userEnteredFormat: { numberFormat: ACCOUNTING_FORMAT } },
-              fields: 'userEnteredFormat.numberFormat',
+            updateCells: {
+              start: { sheetId, rowIndex: 0, columnIndex: 0 },
+              rows: [headerRow, ...dataRows],
+              fields: 'userEnteredValue,userEnteredFormat.numberFormat',
             },
           },
         ],
