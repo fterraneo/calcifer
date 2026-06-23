@@ -9,6 +9,16 @@ const KEY_FILE = path.resolve(process.cwd(), 'service-account.json');
 
 const HEADER = ['Date', 'Description', 'Details', 'Amount', 'Category'];
 
+const DATE_FORMAT = { type: 'DATE', pattern: 'YYYY-MM-DD' };
+const ACCOUNTING_FORMAT = {
+  type: 'NUMBER',
+  pattern: '_(€* #,##0.00_);_(€* (#,##0.00);_(€* "-"??_);_(@_)',
+};
+
+function toSheetsSerial(date: Date): number {
+  return Math.floor(date.getTime() / 86400000) + 25569;
+}
+
 export class GoogleSheetsTransactionWriter implements SaveTransactionsPort {
   async save(transactions: Transaction[]): Promise<void> {
     const auth = new google.auth.GoogleAuth({
@@ -20,7 +30,7 @@ export class GoogleSheetsTransactionWriter implements SaveTransactionsPort {
     const range = `${SHEET_NAME}!A1`;
 
     const rows = transactions.map((tx) => [
-      tx.date.toISOString().slice(0, 10),
+      toSheetsSerial(tx.date),
       tx.description,
       tx.details,
       tx.amount,
@@ -35,8 +45,37 @@ export class GoogleSheetsTransactionWriter implements SaveTransactionsPort {
     await sheets.spreadsheets.values.update({
       spreadsheetId: SPREADSHEET_ID,
       range,
-      valueInputOption: 'USER_ENTERED',
+      valueInputOption: 'RAW',
       requestBody: { values: [HEADER, ...rows] },
+    });
+
+    const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
+    const sheet = spreadsheet.data.sheets?.find(
+      (s) => s.properties?.title === SHEET_NAME,
+    );
+    const sheetId = sheet?.properties?.sheetId ?? 0;
+    const dataRowCount = transactions.length + 1; // +1 for header
+
+    await sheets.spreadsheets.batchUpdate({
+      spreadsheetId: SPREADSHEET_ID,
+      requestBody: {
+        requests: [
+          {
+            repeatCell: {
+              range: { sheetId, startRowIndex: 1, endRowIndex: dataRowCount, startColumnIndex: 0, endColumnIndex: 1 },
+              cell: { userEnteredFormat: { numberFormat: DATE_FORMAT } },
+              fields: 'userEnteredFormat.numberFormat',
+            },
+          },
+          {
+            repeatCell: {
+              range: { sheetId, startRowIndex: 1, endRowIndex: dataRowCount, startColumnIndex: 3, endColumnIndex: 4 },
+              cell: { userEnteredFormat: { numberFormat: ACCOUNTING_FORMAT } },
+              fields: 'userEnteredFormat.numberFormat',
+            },
+          },
+        ],
+      },
     });
   }
 }
