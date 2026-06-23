@@ -8,3 +8,4 @@ coverage/
 .idea/
 service-account.json
 import-failures.txt
+/input-files
