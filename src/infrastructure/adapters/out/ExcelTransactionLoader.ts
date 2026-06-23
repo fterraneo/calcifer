@@ -5,7 +5,7 @@ import { ImportFailure } from '../../../core/domain/model/ImportFailure';
 import { LoadTransactionsPort } from '../../../core/domain/ports/LoadTransactionsPort';
 import { ReportImportFailuresPort } from '../../../core/domain/ports/ReportImportFailuresPort';
 
-const FILE_PATH = path.resolve(process.cwd(), 'export.xlsx');
+const FILE_PATH = path.resolve(process.cwd(), 'input-files/export.xlsx');
 const DATA_START_INDEX = 19;
 
 const COL = {
