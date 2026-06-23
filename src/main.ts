@@ -1,10 +1,11 @@
 import { ExcelTransactionLoader } from './infrastructure/adapters/out/ExcelTransactionLoader';
+import { FileImportFailureReporter } from './infrastructure/adapters/out/FileImportFailureReporter';
 import { GoogleSheetsTransactionWriter } from './infrastructure/adapters/out/GoogleSheetsTransactionWriter';
 import { BankStatementService } from './core/application/BankStatementService';
 import { TransactionUploadService } from './core/application/TransactionUploadService';
 
 async function main(): Promise<void> {
-  const loader = new ExcelTransactionLoader();
+  const loader = new ExcelTransactionLoader(new FileImportFailureReporter());
 
   const reportService = new BankStatementService(loader);
   const summaries = await reportService.summarizeByCategory();
