@@ -13,7 +13,7 @@ const HEADER = ['Date', 'Description', 'Details', 'Amount', 'Category'];
 const DATE_FORMAT = { type: 'DATE', pattern: 'dd/mm/yyyy' };
 
 // € 1.234,56 for positives, € -50,13 for negatives (Italian locale rendering)
-const AMOUNT_FORMAT = { type: 'NUMBER', pattern: '€ #,##0.00;€ -#,##0.00' };
+const AMOUNT_FORMAT = { type: 'NUMBER', pattern: '_-[$€-2]* #,##0.00_-;_-[$€-2]* \\-#,##0.00_-;_-[$€-2]* "-"??_-;_-@' };
 
 function toIsoDateString(date: Date): string {
   return date.toISOString().slice(0, 10); // "2026-06-18" — universally parsed by Sheets
