@@ -1,10 +1,11 @@
 import * as XLSX from 'xlsx';
 import * as path from 'path';
 import { Transaction } from '../../../core/domain/model/Transaction';
+import { ImportFailure } from '../../../core/domain/model/ImportFailure';
 import { LoadTransactionsPort } from '../../../core/domain/ports/LoadTransactionsPort';
+import { ReportImportFailuresPort } from '../../../core/domain/ports/ReportImportFailuresPort';
 
 const FILE_PATH = path.resolve(process.cwd(), 'export.xlsx');
-const HEADER_ROW_INDEX = 18;
 const DATA_START_INDEX = 19;
 
 const COL = {
@@ -21,21 +22,40 @@ function excelSerialToDate(serial: number): Date {
 }
 
 export class ExcelTransactionLoader implements LoadTransactionsPort {
+  constructor(private readonly failureReporter: ReportImportFailuresPort) {}
+
   async load(): Promise<Transaction[]> {
     const workbook = XLSX.readFile(FILE_PATH);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const rows: unknown[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
 
-    return rows
-      .slice(DATA_START_INDEX)
-      .filter((row) => row[COL.DATE] !== null && row[COL.AMOUNT] !== null)
-      .map((row) => new Transaction(
-        excelSerialToDate(row[COL.DATE] as number),
-        String(row[COL.DESCRIPTION] ?? '').trim(),
-        String(row[COL.DETAILS] ?? '').trim(),
-        row[COL.AMOUNT] as number,
-        String(row[COL.CATEGORY] ?? '').trim(),
-        String(row[COL.CURRENCY] ?? '').trim(),
-      ));
+    const transactions: Transaction[] = [];
+    const failures: ImportFailure[] = [];
+
+    rows.slice(DATA_START_INDEX).forEach((row, index) => {
+      const rowIndex = DATA_START_INDEX + index + 1;
+      try {
+        const date = row[COL.DATE];
+        const amount = row[COL.AMOUNT];
+        if (date === null || date === undefined) throw new Error('missing date');
+        if (amount === null || amount === undefined) throw new Error('missing amount');
+        if (typeof date !== 'number') throw new Error(`invalid date value: ${date}`);
+        if (typeof amount !== 'number') throw new Error(`invalid amount value: ${amount}`);
+
+        transactions.push(new Transaction(
+          excelSerialToDate(date),
+          String(row[COL.DESCRIPTION] ?? '').trim(),
+          String(row[COL.DETAILS] ?? '').trim(),
+          amount,
+          String(row[COL.CATEGORY] ?? '').trim(),
+          String(row[COL.CURRENCY] ?? '').trim(),
+        ));
+      } catch (e) {
+        failures.push(new ImportFailure(rowIndex, (e as Error).message));
+      }
+    });
+
+    await this.failureReporter.report(failures);
+    return transactions;
   }
 }
