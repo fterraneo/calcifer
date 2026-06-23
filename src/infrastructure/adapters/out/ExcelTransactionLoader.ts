@@ -10,6 +10,7 @@ const DATA_START_INDEX = 19;
 const COL = {
   DATE: 0,
   DESCRIPTION: 1,
+  DETAILS: 2,
   CATEGORY: 5,
   CURRENCY: 6,
   AMOUNT: 7,
@@ -31,6 +32,7 @@ export class ExcelTransactionLoader implements LoadTransactionsPort {
       .map((row) => new Transaction(
         excelSerialToDate(row[COL.DATE] as number),
         String(row[COL.DESCRIPTION] ?? '').trim(),
+        String(row[COL.DETAILS] ?? '').trim(),
         row[COL.AMOUNT] as number,
         String(row[COL.CATEGORY] ?? '').trim(),
         String(row[COL.CURRENCY] ?? '').trim(),

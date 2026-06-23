@@ -26,9 +26,9 @@ describe('BankStatementService — Unit', () => {
 
   it('groups transactions by category and sums amounts', async () => {
     td.when(mockLoader.load()).thenResolve([
-      new Transaction(new Date(), 'Supermercato', -20, 'Generi alimentari', 'EUR'),
-      new Transaction(new Date(), 'Farmacia', -30, 'Farmacia', 'EUR'),
-      new Transaction(new Date(), 'Altro supermercato', -10, 'Generi alimentari', 'EUR'),
+      new Transaction(new Date(), 'Supermercato', '', -20, 'Generi alimentari', 'EUR'),
+      new Transaction(new Date(), 'Farmacia', '', -30, 'Farmacia', 'EUR'),
+      new Transaction(new Date(), 'Altro supermercato', '', -10, 'Generi alimentari', 'EUR'),
     ]);
 
     const result = await service.summarizeByCategory();
@@ -44,9 +44,9 @@ describe('BankStatementService — Unit', () => {
 
   it('sorts results by total ascending (largest expense first)', async () => {
     td.when(mockLoader.load()).thenResolve([
-      new Transaction(new Date(), 'example-transfer', -500, 'Viaggi', 'EUR'),
-      new Transaction(new Date(), 'Bar', -5, 'Ristoranti', 'EUR'),
-      new Transaction(new Date(), 'example-salary', 2000, 'Entrate', 'EUR'),
+      new Transaction(new Date(), 'example-transfer', '', -500, 'Viaggi', 'EUR'),
+      new Transaction(new Date(), 'Bar', '', -5, 'Ristoranti', 'EUR'),
+      new Transaction(new Date(), 'example-salary', '', 2000, 'Entrate', 'EUR'),
     ]);
 
     const result = await service.summarizeByCategory();
