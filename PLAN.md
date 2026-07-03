@@ -69,3 +69,30 @@ Before running, you need to:
 - [x] `GoogleSheetsTransactionWriter` adapter (uses `googleapis`)
 - [x] Wire `main.ts`, add `googleapis` dependency, update `.gitignore`
 
+---
+
+## Feature 3: JSON-based Categorization Rules ✅ COMPLETE
+
+**Goal:** Load categorization rules from an external `categorization-rules.json` file instead of having them hardcoded, with fallback to `RuleBasedCategorizer` for rules not matched in JSON.
+
+**New adapter:** `JsonConfigCategorizer` — `infrastructure/adapters/out/`
+- Implements `CategorizeTransactionPort`
+- Reads `categorization-rules.json` from project root at construction time
+- Same matching logic as `RuleBasedCategorizer` (lowercase keyword search against description + original category)
+- Constructor accepts an optional `fallback: CategorizeTransactionPort` — if no JSON rule matches (or file is missing/invalid), delegates to fallback
+- Gracefully handles missing or malformed JSON file
+
+**Files:**
+- `src/infrastructure/adapters/out/JsonConfigCategorizer.ts` — new adapter
+- `src/infrastructure/adapters/out/JsonConfigCategorizer.test.ts` — unit tests
+- `categorization-rules.json` — starter file with all hardcoded rules, gitignored
+- `src/main.ts` — wired: `new JsonConfigCategorizer(new RuleBasedCategorizer())`
+- `.gitignore` — added `categorization-rules.json`
+
+### Steps (each a shippable commit)
+
+- [x] `JsonConfigCategorizer` + unit test
+- [x] Starter `categorization-rules.json` + `.gitignore` entry
+- [x] Wire `JsonConfigCategorizer` in `main.ts`
+- [x] Update `PLAN.md` with Feature 3
+

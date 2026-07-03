@@ -1,5 +1,6 @@
 import { ExcelTransactionLoader } from './infrastructure/adapters/out/ExcelTransactionLoader';
 import { CategorizedTransactionLoader } from './infrastructure/adapters/out/CategorizedTransactionLoader';
+import { JsonConfigCategorizer } from './infrastructure/adapters/out/JsonConfigCategorizer';
 import { RuleBasedCategorizer } from './infrastructure/adapters/out/RuleBasedCategorizer';
 import { FileImportFailureReporter } from './infrastructure/adapters/out/FileImportFailureReporter';
 import { GoogleSheetsTransactionWriter } from './infrastructure/adapters/out/GoogleSheetsTransactionWriter';
@@ -9,7 +10,7 @@ import { TransactionUploadService } from './core/application/TransactionUploadSe
 async function main(): Promise<void> {
   const loader = new CategorizedTransactionLoader(
     new ExcelTransactionLoader(new FileImportFailureReporter()),
-    new RuleBasedCategorizer(),
+    new JsonConfigCategorizer(new RuleBasedCategorizer()),
   );
 
   const reportService = new BankStatementService(loader);
