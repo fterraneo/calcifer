@@ -6,4 +6,5 @@ export type Category =
   | 'Electricity Bill'
   | 'House Rent'
   | 'Recurring Payments'
+  | 'Coffee'
   | 'Others';
