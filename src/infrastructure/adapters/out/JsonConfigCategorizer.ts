@@ -36,7 +36,7 @@ export class JsonConfigCategorizer implements CategorizeTransactionPort {
   }
 
   categorize(tx: Transaction): string {
-    const fromDescription = this.matchRules(tx.description.toLowerCase());
+    const fromDescription = this.matchRules(`${tx.description} ${tx.details}`.toLowerCase());
     if (fromDescription) return fromDescription;
 
     const fromCategory = this.matchRules(tx.category.toLowerCase());

@@ -10,8 +10,8 @@ function tmpConfig(): string {
   return path.join(os.tmpdir(), `categorization-rules-${Date.now()}-${seq}.json`);
 }
 
-function tx(description: string, category: string): Transaction {
-  return new Transaction(new Date(), description, '', 0, category, 'EUR');
+function tx(description: string, category: string, details = ''): Transaction {
+  return new Transaction(new Date(), description, details, 0, category, 'EUR');
 }
 
 describe('JsonConfigCategorizer', () => {
@@ -63,6 +63,26 @@ describe('JsonConfigCategorizer', () => {
     ]), 'utf-8');
     const categorizer = new JsonConfigCategorizer(configPath);
     expect(categorizer.categorize(tx('Supermercato', 'Alimentari'))).toBe('Grocery');
+    fs.unlinkSync(configPath);
+  });
+
+  it('matches on details when description does not match', () => {
+    const configPath = tmpConfig();
+    fs.writeFileSync(configPath, JSON.stringify([
+      { keywords: ['abbonamento'], category: 'Recurring Payments' },
+    ]), 'utf-8');
+    const categorizer = new JsonConfigCategorizer(configPath);
+    expect(categorizer.categorize(tx('Generic payment', 'Misc', 'example-streaming abbonamento mensile'))).toBe('Recurring Payments');
+    fs.unlinkSync(configPath);
+  });
+
+  it('integrates description and details for matching', () => {
+    const configPath = tmpConfig();
+    fs.writeFileSync(configPath, JSON.stringify([
+      { keywords: ['example-grocer'], category: 'Grocery' },
+    ]), 'utf-8');
+    const categorizer = new JsonConfigCategorizer(configPath);
+    expect(categorizer.categorize(tx('', 'Misc', 'Pagamento example-grocer'))).toBe('Grocery');
     fs.unlinkSync(configPath);
   });
 
