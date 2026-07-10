@@ -13,7 +13,9 @@ async function main(): Promise<void> {
   );
 
   const reportService = new BankStatementService(loader);
-  const summaries = await reportService.summarizeByCategory();
+  const since = new Date();
+  since.setDate(since.getDate() - 30);
+  const summaries = await reportService.summarizeByCategory(since);
 
   const labelWidth = Math.max(...summaries.map((s) => s.category.length), 'Category'.length);
 

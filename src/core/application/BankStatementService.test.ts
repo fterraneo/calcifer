@@ -55,4 +55,28 @@ describe('BankStatementService — Unit', () => {
     expect(result[1].category).toBe('Ristoranti');
     expect(result[2].category).toBe('Entrate');
   });
+
+  it('filters out transactions older than the given date', async () => {
+    td.when(mockLoader.load()).thenResolve([
+      new Transaction(new Date('2026-01-01'), 'Old', '', -10, 'Past', 'EUR'),
+      new Transaction(new Date('2026-06-01'), 'Recent', '', -20, 'Present', 'EUR'),
+    ]);
+
+    const result = await service.summarizeByCategory(new Date('2026-05-01'));
+
+    expect(result).toHaveLength(1);
+    expect(result[0].category).toBe('Present');
+    expect(result[0].total).toBe(-20);
+  });
+
+  it('includes transactions on the given date', async () => {
+    td.when(mockLoader.load()).thenResolve([
+      new Transaction(new Date('2026-06-15'), 'Exact', '', -100, 'OnDate', 'EUR'),
+    ]);
+
+    const result = await service.summarizeByCategory(new Date('2026-06-15'));
+
+    expect(result).toHaveLength(1);
+    expect(result[0].total).toBe(-100);
+  });
 });

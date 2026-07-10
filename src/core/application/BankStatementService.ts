@@ -4,11 +4,15 @@ import { LoadTransactionsPort } from '../domain/ports/LoadTransactionsPort';
 export class BankStatementService {
   constructor(private readonly loadTransactions: LoadTransactionsPort) {}
 
-  async summarizeByCategory(): Promise<CategorySummary[]> {
+  async summarizeByCategory(since?: Date): Promise<CategorySummary[]> {
     const transactions = await this.loadTransactions.load();
 
+    const filtered = since
+      ? transactions.filter((tx) => tx.date >= since)
+      : transactions;
+
     const totals = new Map<string, number>();
-    for (const tx of transactions) {
+    for (const tx of filtered) {
       totals.set(tx.category, (totals.get(tx.category) ?? 0) + tx.amount);
     }
 
