@@ -1,3 +1,4 @@
+import * as path from 'path';
 import { ExcelTransactionLoader } from './infrastructure/adapters/out/ExcelTransactionLoader';
 import { CategorizedTransactionLoader } from './infrastructure/adapters/out/CategorizedTransactionLoader';
 import { JsonConfigCategorizer } from './infrastructure/adapters/out/JsonConfigCategorizer';
@@ -9,7 +10,7 @@ import { TransactionUploadService } from './core/application/TransactionUploadSe
 async function main(): Promise<void> {
   const loader = new CategorizedTransactionLoader(
     new ExcelTransactionLoader(new FileImportFailureReporter()),
-    new JsonConfigCategorizer(),
+    new JsonConfigCategorizer(process.env.CATEGORIZATION_RULES_PATH ?? path.resolve(process.cwd(), 'categorization-rules.json')),
   );
 
   const reportService = new BankStatementService(loader);

@@ -5,15 +5,16 @@ import { CategorizeTransactionPort } from '../../../core/domain/ports/Categorize
 
 type Rule = { keywords: string[]; category: string };
 
-const CONFIG_PATH = path.resolve(process.cwd(), 'categorization-rules.json');
+const DEFAULT_CONFIG_PATH = path.resolve(process.cwd(), 'categorization-rules.json');
 
 export class JsonConfigCategorizer implements CategorizeTransactionPort {
   private rules: Rule[] | null = null;
 
-  constructor() {
+  constructor(configPath?: string) {
+    const resolvedPath = configPath ?? DEFAULT_CONFIG_PATH;
     try {
-      if (fs.existsSync(CONFIG_PATH)) {
-        const raw = fs.readFileSync(CONFIG_PATH, 'utf-8');
+      if (fs.existsSync(resolvedPath)) {
+        const raw = fs.readFileSync(resolvedPath, 'utf-8');
         const parsed: unknown = JSON.parse(raw);
         if (Array.isArray(parsed)) {
           this.rules = parsed as Rule[];
