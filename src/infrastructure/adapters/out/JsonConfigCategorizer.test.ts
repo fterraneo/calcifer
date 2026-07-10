@@ -34,12 +34,29 @@ describe('JsonConfigCategorizer', () => {
     expect(categorizer.categorize(tx('PAGAMENTO example-grocer SUPERMERCATO', ''))).toBe('Grocery');
   });
 
-  it('searches both description and original category', () => {
+  it('matches on input category when description has no match', () => {
     fs.writeFileSync(CONFIG_PATH, JSON.stringify([
       { keywords: ['alimentari'], category: 'Grocery' },
     ]), 'utf-8');
     const categorizer = new JsonConfigCategorizer();
     expect(categorizer.categorize(tx('Some purchase', 'Generi Alimentari e Supermercato'))).toBe('Grocery');
+  });
+
+  it('prefers description match over input category match', () => {
+    fs.writeFileSync(CONFIG_PATH, JSON.stringify([
+      { keywords: ['example-streaming'], category: 'Recurring Payments' },
+    ]), 'utf-8');
+    const categorizer = new JsonConfigCategorizer();
+    expect(categorizer.categorize(tx('example-streaming', 'Film e Intrattenimento'))).toBe('Recurring Payments');
+  });
+
+  it('does not fall through to category when description already matches', () => {
+    fs.writeFileSync(CONFIG_PATH, JSON.stringify([
+      { keywords: ['supermercato'], category: 'Grocery' },
+      { keywords: ['alimentari'], category: 'Food' },
+    ]), 'utf-8');
+    const categorizer = new JsonConfigCategorizer();
+    expect(categorizer.categorize(tx('Supermercato', 'Alimentari'))).toBe('Grocery');
   });
 
   it('returns Others when no JSON rule matches', () => {

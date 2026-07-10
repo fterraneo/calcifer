@@ -24,15 +24,23 @@ export class JsonConfigCategorizer implements CategorizeTransactionPort {
     }
   }
 
-  categorize(tx: Transaction): string {
-    if (this.rules && this.rules.length > 0) {
-      const text = `${tx.description} ${tx.category}`.toLowerCase();
-      for (const rule of this.rules) {
-        if (rule.keywords.some((kw) => text.includes(kw))) {
-          return rule.category;
-        }
+  private matchRules(text: string): string | null {
+    if (!this.rules) return null;
+    for (const rule of this.rules) {
+      if (rule.keywords.some((kw) => text.includes(kw))) {
+        return rule.category;
       }
     }
+    return null;
+  }
+
+  categorize(tx: Transaction): string {
+    const fromDescription = this.matchRules(tx.description.toLowerCase());
+    if (fromDescription) return fromDescription;
+
+    const fromCategory = this.matchRules(tx.category.toLowerCase());
+    if (fromCategory) return fromCategory;
+
     return 'Others';
   }
 }
