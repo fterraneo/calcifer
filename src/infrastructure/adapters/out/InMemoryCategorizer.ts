@@ -1,11 +1,10 @@
 import { Transaction } from '../../../core/domain/model/Transaction';
-import { Category } from '../../../core/domain/model/Category';
 import { CategorizeTransactionPort } from '../../../core/domain/ports/CategorizeTransactionPort';
 
 export class InMemoryCategorizer implements CategorizeTransactionPort {
-  constructor(private readonly fixedCategory: Category = 'Others') {}
+  constructor(private readonly fixedCategory: string = 'Others') {}
 
-  categorize(_tx: Transaction): Category {
+  categorize(_tx: Transaction): string {
     return this.fixedCategory;
   }
 }
