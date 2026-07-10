@@ -15,26 +15,30 @@ async function main(): Promise<void> {
 
   const reportService = new BankStatementService(loader);
   const now = new Date();
-  const since = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const summaries = await reportService.summarizeByCategory(since);
+  const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  const labelWidth = Math.max(...summaries.map((s) => s.category.length), 'Category'.length);
+  async function printReport(monthStart: Date, title: string): Promise<void> {
+    const summaries = await reportService.summarizeByCategory(monthStart);
+    const labelWidth = Math.max(...summaries.map((s) => s.category.length), 'Category'.length);
 
-  const monthLabel = since.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-
-  console.log('');
-  console.log(`Report for ${monthLabel}`);
-  console.log('');
-  console.log(`${'Category'.padEnd(labelWidth)}   Amount (EUR)`);
-  console.log(`${'-'.repeat(labelWidth)}   -------------`);
-  for (const s of summaries) {
-    const amount = s.total.toFixed(2).padStart(13);
-    console.log(`${s.category.padEnd(labelWidth)}   ${amount}`);
+    console.log('');
+    console.log(title);
+    console.log('');
+    console.log(`${'Category'.padEnd(labelWidth)}   Amount (EUR)`);
+    console.log(`${'-'.repeat(labelWidth)}   -------------`);
+    for (const s of summaries) {
+      const amount = s.total.toFixed(2).padStart(13);
+      console.log(`${s.category.padEnd(labelWidth)}   ${amount}`);
+    }
+    console.log(`${'-'.repeat(labelWidth)}   -------------`);
+    const grandTotal = summaries.reduce((sum, s) => sum + s.total, 0);
+    console.log(`${'TOTAL'.padEnd(labelWidth)}   ${grandTotal.toFixed(2).padStart(13)}`);
+    console.log('');
   }
-  console.log(`${'-'.repeat(labelWidth)}   -------------`);
-  const grandTotal = summaries.reduce((sum, s) => sum + s.total, 0);
-  console.log(`${'TOTAL'.padEnd(labelWidth)}   ${grandTotal.toFixed(2).padStart(13)}`);
-  console.log('');
+
+  await printReport(previousMonth, `Report for ${previousMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' })}`);
+  await printReport(currentMonth, `Current month (${currentMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' })})`);
 
   console.log('Uploading transactions to Google Sheets...');
   const uploadService = new TransactionUploadService(loader, new GoogleSheetsTransactionWriter());
