@@ -20,6 +20,10 @@ async function main(): Promise<void> {
 
   const labelWidth = Math.max(...summaries.map((s) => s.category.length), 'Category'.length);
 
+  const monthLabel = since.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+
+  console.log('');
+  console.log(`Report for ${monthLabel}`);
   console.log('');
   console.log(`${'Category'.padEnd(labelWidth)}   Amount (EUR)`);
   console.log(`${'-'.repeat(labelWidth)}   -------------`);
