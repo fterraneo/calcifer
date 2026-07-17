@@ -10,14 +10,53 @@ npm run build        # TypeScript compile
 npm test             # Run all tests (verbose)
 npm run test:watch   # Watch mode for development
 npm run lint         # Type-check only (no emit)
-npm run start        # Run the application (tsx src/main.ts)
+npm start            # Run the application (tsx src/main.ts)
 ```
+
+**Run the application:**
+```bash
+# Default: reads categorization rules from ./categorization-rules.json
+npm start
+
+# Custom rules path:
+CATEGORIZATION_RULES_PATH=/path/to/rules.json npm start
+```
+
+**Output:**
+- Two monthly reports printed to stdout (previous month + current month)
+- Transactions uploaded to Google Sheets
+- Parse errors logged to `import-failures.txt` (if any)
 
 **Run a single test:**
 ```bash
-npm test -- tests/unit/HelloWorldService.test.ts
-npm test -- tests/acceptance/hello-world.test.ts
+npm test -- tests/acceptance/bank-statement.test.ts
+npm test -- src/core/application/BankStatementService.test.ts
 ```
+
+## Current Features
+
+### Feature 1: Parse Excel & Print Monthly Report
+- Input: `input-files/export.xlsx` (home banking export, 930+ transactions)
+- Output: Shell table grouped by category, two sections (previous month + current month)
+- Adapters: `ExcelTransactionLoader` (production), `InMemoryTransactionLoader` (tests)
+
+### Feature 2: Upload to Google Sheets
+- Uploads all transactions with Italian date format (dd/mm/yyyy) and EUR accounting amounts
+- Columns: Date, Description, Details, Amount, Category
+- Service account auth (gitignored: `service-account.json`)
+- Spreadsheet ID: `EXAMPLE_SPREADSHEET_ID` (hardcoded in `GoogleSheetsTransactionWriter`)
+- Sheet name: `Calcifer Transactions`
+
+### Feature 3: JSON-Based Categorization
+- Rules file: `categorization-rules.json` (gitignored, user-maintained)
+- Format: JSON array of `{keywords: string[], category: string}`
+- Matching strategy (case-insensitive):
+  1. First: search in (description + details) combined
+  2. Fallback: search in original bank category
+  3. Default: return `'Others'` if no match
+- Categories are fully dynamic (any string in JSON becomes a valid category)
+- Parametric path: `CATEGORIZATION_RULES_PATH` environment variable (default: `./categorization-rules.json`)
+- Integration: `CategorizedTransactionLoader` decorator wraps Excel loader transparently
 
 ## Architecture
 
@@ -76,7 +115,7 @@ tests/
 - Test services in isolation
 - Mock ports using `testdouble` (not hand-written mocks)
 - Verify interactions with dependencies
-- Located alongside their source file (e.g., `src/core/application/HelloWorldService.test.ts`)
+- Located alongside their source file (e.g., `src/core/application/BankStatementService.test.ts`)
 
 **Acceptance tests** (`tests/acceptance/`):
 - Test full use cases end-to-end
@@ -86,19 +125,66 @@ tests/
 **Example unit test with testdouble:**
 ```typescript
 import * as td from 'testdouble';
-import { GreetingRepository } from '../../src/core/domain/ports/GreetingRepository';
+import { LoadTransactionsPort } from '../../src/core/domain/ports/LoadTransactionsPort';
 
-let mockRepo = td.object<GreetingRepository>();
+let mockLoader: LoadTransactionsPort;
 
-// Stub behavior
-td.when(mockRepo.findLatest()).thenResolve(null);
+afterEach(() => td.reset());
 
-// Verify calls
-td.verify(mockRepo.save(greeting), { times: 1 });
-
-// Reset after test
-td.reset();
+it('does something with loaded transactions', async () => {
+  mockLoader = td.object<LoadTransactionsPort>();
+  const mockTransactions = [/* ... */];
+  
+  td.when(mockLoader.load()).thenResolve(mockTransactions);
+  
+  // ... test code ...
+  
+  td.verify(mockLoader.load(), { times: 1 });
+});
 ```
+
+## Design Patterns in Use
+
+### Decorator Pattern (Categorization)
+The `CategorizedTransactionLoader` wraps any `LoadTransactionsPort` implementation and applies categorization transparently:
+```typescript
+const loader = new CategorizedTransactionLoader(
+  new ExcelTransactionLoader(...),
+  new JsonConfigCategorizer(...)
+);
+// loader implements LoadTransactionsPort and can be injected anywhere
+```
+Benefits:
+- No changes needed to `BankStatementService` or `TransactionUploadService`
+- Easy to swap categorizers (JSON-based, rule-based, ML-based, etc.)
+- Can be unit-tested in isolation
+
+### Configuration from External Files
+`JsonConfigCategorizer` reads JSON rules at construction time:
+- Graceful degradation: missing file → all transactions → `'Others'`
+- Environment variable `CATEGORIZATION_RULES_PATH` overrides default location
+- No startup failure if config is invalid — falls back to safe default
+
+## Important Technical Notes
+
+### Excel Parsing Bug Fix
+The bank's Excel export has corrupt dimension metadata (`<dimension ref="A1:J33"/>` when data goes to row 849).  
+Fix in `ExcelTransactionLoader`: Compute actual max row from cells and override `ws['!ref']` before calling `sheet_to_json`.
+
+### Google Sheets Formatting
+- **Date**: Sent as ISO string (YYYY-MM-DD), displayed in Sheets as Italian format (dd/mm/yyyy)
+- **Amount**: Uses EUR symbol with space, minus (not parentheses) for negatives per Italian convention
+  - Pattern: `€ #,##0.00;€ -#,##0.00`
+
+### Month Filtering
+- **Previous month**: 1st of last calendar month to last day
+- **Current month**: 1st of this month to today
+- Both printed in one run; both uploaded to Sheets (same sheet, all transactions)
+
+### Error Handling
+- Parse errors logged to `import-failures.txt` (overwritten per run)
+- Invalid categorization JSON → all transactions → `'Others'` (no startup failure)
+- Missing Google auth → upload fails with clear error
 
 ## Git Workflow
 

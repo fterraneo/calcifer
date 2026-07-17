@@ -53,10 +53,30 @@ npm run lint         # Type-check only (no emit)
 - Commit every step — small, atomic commits that each represent a single logical change.
 - Every commit must keep the project in a production-shippable state: all tests pass, type-check is clean, no broken functionality.
 
-## Conventions
+## Patterns Observed
 
-- Domain models: plain objects or simple classes, no decorators, no framework dependencies.
-- Port interfaces: prefixed by role, e.g. `SaveGreetingPort`, `LoadGreetingPort`.
-- Services: stateless, dependencies injected via constructor.
-- Adapters: named by technology, e.g. `InMemoryGreetingRepository`, `PostgresGreetingRepository`.
+### Decorator Pattern (Categorization)
+`CategorizedTransactionLoader` wraps `LoadTransactionsPort` implementations:
+```ts
+const loader = new CategorizedTransactionLoader(
+  new ExcelTransactionLoader(...),
+  new JsonConfigCategorizer(...)
+);
+// loader implements LoadTransactionsPort and can be injected anywhere the interface is expected
+```
+This allows transparent categorization without modifying existing services.
+
+### Configuration from Files
+`JsonConfigCategorizer` reads JSON at construction time. Graceful degradation:
+- File exists and valid JSON → use rules
+- File missing or invalid JSON → fall back to default ('Others' for all)
+- Exception handling in constructor prevents startup failure
+
+### Environment Variables
+Use `process.env` to parametrize paths and configuration:
+```ts
+const path = process.env.CATEGORIZATION_RULES_PATH ?? './categorization-rules.json';
+```
+
+---
 
