@@ -8,8 +8,11 @@ import { BankStatementService } from './core/application/BankStatementService';
 import { TransactionUploadService } from './core/application/TransactionUploadService';
 
 async function main(): Promise<void> {
+  const failureReporter = new FileImportFailureReporter();
+  await failureReporter.clear();
+
   const loader = new CategorizedTransactionLoader(
-    new ExcelTransactionLoader(new FileImportFailureReporter()),
+    new ExcelTransactionLoader(failureReporter),
     new JsonConfigCategorizer(process.env.CATEGORIZATION_RULES_PATH ?? path.resolve(process.cwd(), 'categorization-rules.json')),
   );
 

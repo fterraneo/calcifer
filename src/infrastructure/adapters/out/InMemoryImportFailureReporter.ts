@@ -5,6 +5,10 @@ export class InMemoryImportFailureReporter implements ReportImportFailuresPort {
   public reportedFailures: ImportFailure[] = [];
 
   async report(failures: ImportFailure[]): Promise<void> {
-    this.reportedFailures = [...failures];
+    this.reportedFailures.push(...failures);
+  }
+
+  async clear(): Promise<void> {
+    this.reportedFailures = [];
   }
 }
