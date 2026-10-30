@@ -9,7 +9,7 @@ Calcifer is a personal finance transaction manager that:
 4. Uploads all transactions to Google Sheets with proper formatting
 
 **Current status:** All features implemented and tested ✅  
-**Test suite:** 29 tests passing across 9 test suites | Type-check clean
+**Test suite:** 38 tests passing across 12 test suites | Type-check clean
 
 ---
 
@@ -236,7 +236,7 @@ CATEGORIZATION_RULES_PATH=/path/to/rules.json npm start
 ### Testing
 
 ```bash
-npm test              # Run all 29 tests (verbose)
+npm test              # Run all 38 tests (verbose)
 npm test:watch       # Watch mode for development
 npm run lint         # Type-check only (no emit)
 ```
@@ -335,5 +335,43 @@ Configuration:
 
 - Consider adding validation for `categorization-rules.json` (e.g., warn if keywords are empty)
 - Consider adding a sample `categorization-rules.json` in the repo (not gitignored) as a template
-- Potential features: multi-account support, budget limits, recurring transaction detection, expense forecasting
+
+---
+
+## Feature 4: Multi-File Loading with Deduplication ✅ COMPLETE
+
+**Goal:** Load transactions from all top-level `.xlsx` files in `input-files/`, deduplicate across all files and within each file, and return a single ordered list of unique transactions.
+
+### What was built
+- **Deduplication**: key is all six fields (date as ISO string, description, details, amount, category, currency). First occurrence kept; order preserved.
+- **`DeduplicatedTransactions`** (`core/domain/model/`): `{ unique: Transaction[], duplicateCount: number }`. Used internally by `MultiFileExcelLoader`; not exposed through the port.
+- **`MultiFileExcelLoader`** (`infrastructure/adapters/out/`): implements `LoadTransactionsPort`. Takes a list of `LoadTransactionsPort` sources (one `ExcelTransactionLoader` per file) and a `ReportImportFailuresPort`.
+- **Summary reporting**: files processed and duplicates removed are reported through `ReportImportFailuresPort` as entries with `rowIndex: 0`, since the port only accepts `ImportFailure`.
+- **`ExcelTransactionLoader`**: file path and reader are constructor parameters (function-typed seam, no new port). Default path is still the hardcoded export; `main.ts` passes each discovered file explicitly.
+- **`main.ts`**: discovers `.xlsx` files in `input-files/` (sorted), builds one `ExcelTransactionLoader` per file, wraps them in `MultiFileExcelLoader`, then in `CategorizedTransactionLoader`.
+
+### Reporting change
+`ReportImportFailuresPort` gained `clear()`. `FileImportFailureReporter` now appends on each `report()` call (no-op for an empty list) and `main.ts` clears the file once at startup. Previously each call overwrote the file, so per-file parse errors and summaries would have replaced each other. `FileImportFailureReporter` takes an injectable report path for tests.
+
+### Tests
+- `tests/acceptance/multi-file-loading.test.ts`: three in-memory sources with duplicates within and across sources; asserts order, unique rows, and reported counts.
+- `MultiFileExcelLoader.test.ts`: unit tests with `testdouble` mocks for sources and reporter.
+- `FileImportFailureReporter.test.ts`: append, empty list, and clear, using a temp directory.
+
+### Commits
+1. `d62291a` ExcelTransactionLoader file path and reader injectable
+2. `5401aba` DeduplicatedTransactions domain model
+3. `9906b61` Reporter appends per run; clear at startup (port change)
+4. `7e2bac0` MultiFileExcelLoader with acceptance and unit tests
+5. `783b0d8` main.ts wiring and README
+
+---
+
+## Potential Features
+
+- Budget limits and spending alerts
+- Recurring transaction detection
+- Multi-account support
+- Expense forecasting
+- Custom reports (by timerange, by tags, etc.)
 
