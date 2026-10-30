@@ -202,8 +202,7 @@ Fix in `ExcelTransactionLoader`: Compute actual max row from cells and override 
 
 **Commits:**
 - Author: `f.terraneo <f.terraneo@hotmail.com>`
-- Always include a Co-authored-by trailer with the assisting agent/model
-- Example: `Co-authored-by: Claude Haiku <123456+claude-haiku@users.noreply.github.com>`
+- Always include a Co-authored-by trailer with the model currently running the session; follow the rule in `AGENTS.md` (`## Git`)
 - Make small, atomic commits representing single logical changes
 - Every commit must keep the project in a production-shippable state
 - All tests pass, type-check is clean, no broken functionality
