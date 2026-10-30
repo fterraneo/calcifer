@@ -22,10 +22,14 @@ function excelSerialToDate(serial: number): Date {
 }
 
 export class ExcelTransactionLoader implements LoadTransactionsPort {
-  constructor(private readonly failureReporter: ReportImportFailuresPort) {}
+  constructor(
+    private readonly failureReporter: ReportImportFailuresPort,
+    private readonly filePath: string = FILE_PATH,
+    private readonly readFile: (filePath: string) => XLSX.WorkBook = XLSX.readFile,
+  ) {}
 
   async load(): Promise<Transaction[]> {
-    const workbook = XLSX.readFile(FILE_PATH);
+    const workbook = this.readFile(this.filePath);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
     // The bank's export sets an incorrect <dimension> in the worksheet (e.g. A1:J33),
