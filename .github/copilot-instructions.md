@@ -165,6 +165,18 @@ Benefits:
 - Environment variable `CATEGORIZATION_RULES_PATH` overrides default location
 - No startup failure if config is invalid — falls back to safe default
 
+## Documentation
+
+`README.md` is the public entry point and must stay in sync with the code. Whenever you add, rename, or remove a port or a **production** adapter, update the Mermaid diagram under `## Architecture` in the same commit.
+
+Diagram conventions:
+- Show only domain ports (inside the hexagon) and production adapters that implement them.
+- Omit application services.
+- Omit in-memory/test adapters.
+- Keep adapters pointing at the port they implement.
+
+Also update `README.md` when setup, usage, scripts, or feature behavior changes.
+
 ## Important Technical Notes
 
 ### Excel Parsing Bug Fix
@@ -209,7 +221,7 @@ npm run build         # Build succeeds (optional if using TS directly)
 2. **Implement the use case**: Add service and domain models in `core/`
 3. **Define ports**: Create interfaces in `core/domain/ports/`
 4. **Implement adapters**: Create concrete adapters in `infrastructure/adapters/`
-5. **Add unit tests**: Test services with mocked ports in `tests/unit/`
+5. **Add unit tests**: Colocate a `*.test.ts` file next to the source, mocking ports with `testdouble`
 
 ## Stack
 

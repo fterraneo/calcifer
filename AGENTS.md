@@ -19,8 +19,9 @@ src/
       out/       # Outbound adapters (repositories, APIs, etc.)
 tests/
   acceptance/    # "Large" outside-in tests — use in-memory adapters
-  unit/          # Unit tests — mock ports with testdouble
 ```
+
+Unit tests are colocated with their source as `*.test.ts` (e.g. `src/core/application/*.test.ts`) and mock ports with `testdouble`.
 
 ## Principles
 
@@ -77,6 +78,18 @@ Use `process.env` to parametrize paths and configuration:
 ```ts
 const path = process.env.CATEGORIZATION_RULES_PATH ?? './categorization-rules.json';
 ```
+
+## Documentation
+
+`README.md` is the public entry point and must stay in sync with the code. Whenever you add, rename, or remove a port or a **production** adapter, update the Mermaid diagram under `## Architecture` in the same commit.
+
+Diagram conventions:
+- Show only domain ports (inside the hexagon) and production adapters that implement them.
+- Omit application services.
+- Omit in-memory/test adapters.
+- Keep adapters pointing at the port they implement.
+
+Also update `README.md` when setup, usage, scripts, or feature behavior changes.
 
 ---
 

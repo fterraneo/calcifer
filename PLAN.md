@@ -326,7 +326,8 @@ Configuration:
 5. **Add unit tests** in the same file (colocated `*.test.ts`, use `testdouble` for mocking)
 6. **Implement adapters** in `src/infrastructure/adapters/out/` (concrete implementations)
 7. **Wire in `main.ts`** (compose services and adapters)
-8. **Commit atomically** — each commit represents one step above and must pass tests
+8. **Update `README.md`** (architecture diagram and any affected setup/usage docs) in the same commit as the port/adapter change
+9. **Commit atomically** — each commit represents one step above and must pass tests
 
 ---
 
