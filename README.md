@@ -29,7 +29,7 @@ Create `categorization-rules.json` in the project root (gitignored):
 ]
 ```
 
-Place the bank export at `input-files/export.xlsx` (gitignored).
+Place the bank exports (`.xlsx`) in `input-files/` (gitignored). Every top-level `.xlsx` file is loaded; transactions appearing in more than one file, or more than once in a file, are counted once.
 
 ## Usage
 
@@ -42,7 +42,7 @@ Output:
 
 1. Two monthly reports on stdout
 2. Transactions uploaded to Google Sheets
-3. Parse errors written to `import-failures.txt` (if any)
+3. Parse errors and load summaries (files processed, duplicates removed) written to `import-failures.txt` (if any; overwritten per run)
 
 ## Development
 
@@ -67,6 +67,7 @@ flowchart LR
   end
 
   ExcelTransactionLoader -- implements --> LP
+  MultiFileExcelLoader -- implements --> LP
   CategorizedTransactionLoader -- implements --> LP
   JsonConfigCategorizer -- implements --> CP
   GoogleSheetsTransactionWriter -- implements --> SP

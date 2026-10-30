@@ -1,5 +1,7 @@
+import * as fs from 'fs';
 import * as path from 'path';
 import { ExcelTransactionLoader } from './infrastructure/adapters/out/ExcelTransactionLoader';
+import { MultiFileExcelLoader } from './infrastructure/adapters/out/MultiFileExcelLoader';
 import { CategorizedTransactionLoader } from './infrastructure/adapters/out/CategorizedTransactionLoader';
 import { JsonConfigCategorizer } from './infrastructure/adapters/out/JsonConfigCategorizer';
 import { FileImportFailureReporter } from './infrastructure/adapters/out/FileImportFailureReporter';
@@ -7,12 +9,25 @@ import { GoogleSheetsTransactionWriter } from './infrastructure/adapters/out/Goo
 import { BankStatementService } from './core/application/BankStatementService';
 import { TransactionUploadService } from './core/application/TransactionUploadService';
 
+const INPUT_DIR = path.resolve(process.cwd(), 'input-files');
+
+function findExcelFiles(dir: string): string[] {
+  return fs
+    .readdirSync(dir)
+    .filter((name) => path.extname(name).toLowerCase() === '.xlsx')
+    .sort()
+    .map((name) => path.join(dir, name));
+}
+
 async function main(): Promise<void> {
   const failureReporter = new FileImportFailureReporter();
   await failureReporter.clear();
 
+  const excelSources = findExcelFiles(INPUT_DIR).map(
+    (filePath) => new ExcelTransactionLoader(failureReporter, filePath),
+  );
   const loader = new CategorizedTransactionLoader(
-    new ExcelTransactionLoader(failureReporter),
+    new MultiFileExcelLoader(excelSources, failureReporter),
     new JsonConfigCategorizer(process.env.CATEGORIZATION_RULES_PATH ?? path.resolve(process.cwd(), 'categorization-rules.json')),
   );
 
