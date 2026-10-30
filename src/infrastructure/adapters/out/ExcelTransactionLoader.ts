@@ -1,11 +1,9 @@
 import * as XLSX from 'xlsx';
-import * as path from 'path';
 import { Transaction } from '../../../core/domain/model/Transaction';
 import { ImportFailure } from '../../../core/domain/model/ImportFailure';
 import { LoadTransactionsPort } from '../../../core/domain/ports/LoadTransactionsPort';
 import { ReportImportFailuresPort } from '../../../core/domain/ports/ReportImportFailuresPort';
 
-const FILE_PATH = path.resolve(process.cwd(), 'input-files/export.xlsx');
 const DATA_START_INDEX = 19;
 
 const COL = {
@@ -24,12 +22,11 @@ function excelSerialToDate(serial: number): Date {
 export class ExcelTransactionLoader implements LoadTransactionsPort {
   constructor(
     private readonly failureReporter: ReportImportFailuresPort,
-    private readonly filePath: string = FILE_PATH,
-    private readonly readFile: (filePath: string) => XLSX.WorkBook = XLSX.readFile,
+    private readonly filePath: string,
   ) {}
 
   async load(): Promise<Transaction[]> {
-    const workbook = this.readFile(this.filePath);
+    const workbook = XLSX.readFile(this.filePath);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
     // The bank's export sets an incorrect <dimension> in the worksheet (e.g. A1:J33),

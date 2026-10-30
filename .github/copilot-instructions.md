@@ -36,7 +36,7 @@ npm test -- src/core/application/BankStatementService.test.ts
 ## Current Features
 
 ### Feature 1: Parse Excel & Print Monthly Report
-- Input: `input-files/export.xlsx` (home banking export, 930+ transactions)
+- Input: all top-level `.xlsx` files in `input-files/` (home banking exports, loaded via `MultiFileExcelLoader`; transactions duplicated across or within files are counted once)
 - Output: Shell table grouped by category, two sections (previous month + current month)
 - Adapters: `ExcelTransactionLoader` (production), `InMemoryTransactionLoader` (tests)
 

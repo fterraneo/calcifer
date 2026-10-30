@@ -347,7 +347,7 @@ Configuration:
 - **`DeduplicatedTransactions`** (`core/domain/model/`): `{ unique: Transaction[], duplicateCount: number }`. Used internally by `MultiFileExcelLoader`; not exposed through the port.
 - **`MultiFileExcelLoader`** (`infrastructure/adapters/out/`): implements `LoadTransactionsPort`. Takes a list of `LoadTransactionsPort` sources (one `ExcelTransactionLoader` per file) and a `ReportImportFailuresPort`.
 - **Summary reporting**: files processed and duplicates removed are reported through `ReportImportFailuresPort` as entries with `rowIndex: 0`, since the port only accepts `ImportFailure`.
-- **`ExcelTransactionLoader`**: file path and reader are constructor parameters (function-typed seam, no new port). Default path is still the hardcoded export; `main.ts` passes each discovered file explicitly.
+- **`ExcelTransactionLoader`**: file path and reader are constructor parameters (function-typed seam, no new port). `main.ts` passes each discovered file explicitly.
 - **`main.ts`**: discovers `.xlsx` files in `input-files/` (sorted), builds one `ExcelTransactionLoader` per file, wraps them in `MultiFileExcelLoader`, then in `CategorizedTransactionLoader`.
 
 ### Reporting change
