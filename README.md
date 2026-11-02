@@ -99,6 +99,10 @@ Wiring lives in `src/main.ts`. The `CategorizedTransactionLoader` decorator wrap
 - **Acceptance tests** (`tests/acceptance/`): full use cases through in-memory adapters.
 - **Unit tests** (colocated `*.test.ts`): services and adapters in isolation, with ports mocked via `testdouble`.
 
+## License
+
+MIT. See `LICENSE`.
+
 ## Conventions
 
 - Outside-in TDD: acceptance test first, then use case, ports, adapters.
