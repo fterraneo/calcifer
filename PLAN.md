@@ -109,7 +109,7 @@ interface SaveTransactionsPort {
 
 - **`GoogleSheetsTransactionWriter`** — Production adapter
   - Uses `googleapis` client library with service account auth
-  - Hardcoded spreadsheet ID: `EXAMPLE_SPREADSHEET_ID`
+  - Spreadsheet ID from env var `GOOGLE_SHEETS_SPREADSHEET_ID` (required, no default)
   - Hardcoded sheet name: `Calcifer Transactions`
   - Flow: `values.clear` → `values.update` (USER_ENTERED, ISO date strings) → `batchUpdate(repeatCell)` for formats
   - Date format: `dd/mm/yyyy` (Italian)
@@ -184,31 +184,31 @@ interface CategorizeTransactionPort {
 ```json
 [
   {
-    "keywords": ["example-grocer", "example-grocer", "example-grocer", "example-grocer", "supermercato"],
+    "keywords": ["example-grocer", "example-market"],
     "category": "Grocery"
   },
   {
-    "keywords": ["example-fuel", "example-fuel", "example-fuel", "carburante"],
+    "keywords": ["example-fuel"],
     "category": "(Car) Gasoline"
   },
   {
-    "keywords": ["example-toll", "pedaggio"],
+    "keywords": ["example-toll"],
     "category": "(Car) Tolls"
   },
   {
-    "keywords": ["example-salary", "salary"],
+    "keywords": ["example-employer", "example-salary"],
     "category": "Salary"
   },
   {
-    "keywords": ["example-utility", "example-utility", "luce"],
+    "keywords": ["example-utility"],
     "category": "Electricity Bill"
   },
   {
-    "keywords": ["example-rent", "example-rent"],
+    "keywords": ["example-landlord"],
     "category": "House Rent"
   },
   {
-    "keywords": ["example-streaming", "example-streaming", "example-streaming"],
+    "keywords": ["example-streaming", "example-subscription"],
     "category": "Recurring Payments"
   }
 ]

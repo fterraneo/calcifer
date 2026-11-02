@@ -21,17 +21,17 @@ describe('JsonConfigCategorizer', () => {
       { keywords: ['example-grocer'], category: 'Grocery' },
     ]), 'utf-8');
     const categorizer = new JsonConfigCategorizer(configPath);
-    expect(categorizer.categorize(tx('Pagamento example-grocer', ''))).toBe('Grocery');
+    expect(categorizer.categorize(tx('Pagamento EXAMPLE-GROCER', ''))).toBe('Grocery');
     fs.unlinkSync(configPath);
   });
 
   it('is case-insensitive', () => {
     const configPath = tmpConfig();
     fs.writeFileSync(configPath, JSON.stringify([
-      { keywords: ['example-grocer'], category: 'Grocery' },
+      { keywords: ['example-market'], category: 'Grocery' },
     ]), 'utf-8');
     const categorizer = new JsonConfigCategorizer(configPath);
-    expect(categorizer.categorize(tx('PAGAMENTO example-grocer SUPERMERCATO', ''))).toBe('Grocery');
+    expect(categorizer.categorize(tx('PAGAMENTO EXAMPLE-MARKET SUPERMERCATO', ''))).toBe('Grocery');
     fs.unlinkSync(configPath);
   });
 
@@ -51,7 +51,7 @@ describe('JsonConfigCategorizer', () => {
       { keywords: ['example-streaming'], category: 'Recurring Payments' },
     ]), 'utf-8');
     const categorizer = new JsonConfigCategorizer(configPath);
-    expect(categorizer.categorize(tx('example-streaming', 'Film e Intrattenimento'))).toBe('Recurring Payments');
+    expect(categorizer.categorize(tx('EXAMPLE-STREAMING', 'Film e Intrattenimento'))).toBe('Recurring Payments');
     fs.unlinkSync(configPath);
   });
 
@@ -72,17 +72,17 @@ describe('JsonConfigCategorizer', () => {
       { keywords: ['abbonamento'], category: 'Recurring Payments' },
     ]), 'utf-8');
     const categorizer = new JsonConfigCategorizer(configPath);
-    expect(categorizer.categorize(tx('Generic payment', 'Misc', 'example-streaming abbonamento mensile'))).toBe('Recurring Payments');
+    expect(categorizer.categorize(tx('Generic payment', 'Misc', 'EXAMPLE-STREAMING abbonamento mensile'))).toBe('Recurring Payments');
     fs.unlinkSync(configPath);
   });
 
   it('integrates description and details for matching', () => {
     const configPath = tmpConfig();
     fs.writeFileSync(configPath, JSON.stringify([
-      { keywords: ['example-grocer'], category: 'Grocery' },
+      { keywords: ['example-market'], category: 'Grocery' },
     ]), 'utf-8');
     const categorizer = new JsonConfigCategorizer(configPath);
-    expect(categorizer.categorize(tx('', 'Misc', 'Pagamento example-grocer'))).toBe('Grocery');
+    expect(categorizer.categorize(tx('', 'Misc', 'Pagamento EXAMPLE-MARKET'))).toBe('Grocery');
     fs.unlinkSync(configPath);
   });
 

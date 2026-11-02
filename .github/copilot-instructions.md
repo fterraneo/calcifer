@@ -44,7 +44,7 @@ npm test -- src/core/application/BankStatementService.test.ts
 - Uploads all transactions with Italian date format (dd/mm/yyyy) and EUR accounting amounts
 - Columns: Date, Description, Details, Amount, Category
 - Service account auth (gitignored: `service-account.json`)
-- Spreadsheet ID: `EXAMPLE_SPREADSHEET_ID` (hardcoded in `GoogleSheetsTransactionWriter`)
+- Spreadsheet ID: required env var `GOOGLE_SHEETS_SPREADSHEET_ID` (read by `GoogleSheetsTransactionWriter`; the run fails with a clear error if unset)
 - Sheet name: `Calcifer Transactions`
 
 ### Feature 3: JSON-Based Categorization

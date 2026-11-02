@@ -3,9 +3,9 @@ import * as path from 'path';
 import { Transaction } from '../../../core/domain/model/Transaction';
 import { SaveTransactionsPort } from '../../../core/domain/ports/SaveTransactionsPort';
 
-const SPREADSHEET_ID = 'EXAMPLE_SPREADSHEET_ID';
 const SHEET_NAME = 'Calcifer Transactions';
 const KEY_FILE = path.resolve(process.cwd(), 'service-account.json');
+const SPREADSHEET_ID_ENV = 'GOOGLE_SHEETS_SPREADSHEET_ID';
 
 const HEADER = ['Date', 'Description', 'Details', 'Amount', 'Category'];
 
@@ -19,8 +19,17 @@ function toIsoDateString(date: Date): string {
   return date.toISOString().slice(0, 10); // "2026-06-18" — universally parsed by Sheets
 }
 
+function requireSpreadsheetId(): string {
+  const id = process.env[SPREADSHEET_ID_ENV];
+  if (!id) {
+    throw new Error(`${SPREADSHEET_ID_ENV} is not set. Set it to the target Google Spreadsheet ID.`);
+  }
+  return id;
+}
+
 export class GoogleSheetsTransactionWriter implements SaveTransactionsPort {
   async save(transactions: Transaction[]): Promise<void> {
+    const SPREADSHEET_ID = requireSpreadsheetId();
     const auth = new google.auth.GoogleAuth({
       keyFile: KEY_FILE,
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],

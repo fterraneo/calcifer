@@ -13,19 +13,21 @@ Personal finance transaction manager. Parses a home banking Excel export, catego
 - Node.js 20.15.0 (see `.nvmrc`)
 - A Google Cloud service account with Sheets API access, saved as `service-account.json` (gitignored)
 - The target spreadsheet shared with the service account email (Editor)
+- The target spreadsheet ID exported as `GOOGLE_SHEETS_SPREADSHEET_ID` (the ID is the part of the sheet URL between `/d/` and `/edit`)
 
 ## Setup
 
 ```bash
 npm install
+export GOOGLE_SHEETS_SPREADSHEET_ID=<your-spreadsheet-id>
 ```
 
 Create `categorization-rules.json` in the project root (gitignored):
 
 ```json
 [
-  { "keywords": ["example-grocer", "example-grocer", "example-grocer"], "category": "Grocery" },
-  { "keywords": ["example-streaming", "example-streaming"], "category": "Recurring Payments" }
+  { "keywords": ["example-grocer", "example-market"], "category": "Grocery" },
+  { "keywords": ["example-streaming"], "category": "Subscriptions" }
 ]
 ```
 
