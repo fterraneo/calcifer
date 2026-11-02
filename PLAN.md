@@ -3,7 +3,7 @@
 ## Overview
 
 Calcifer is a personal finance transaction manager that:
-1. Parses a home banking Excel file (930+ transactions)
+1. Parses home banking Excel exports (many transactions)
 2. Categorizes transactions using JSON-based rules
 3. Prints a monthly summary report to the shell
 4. Uploads all transactions to Google Sheets with proper formatting
@@ -36,7 +36,7 @@ Calcifer is a personal finance transaction manager that:
 **Parse Excel and print shell report summarizing transactions by category, filtered by calendar month.**
 
 ### What it does
-- Reads: `input-files/export.xlsx` (home banking export, 930 transactions)
+- Reads: `input-files/*.xlsx` (home banking exports)
 - Parses: transaction date, description, details, amount, original category, currency
 - Categorizes: via JSON-based rules in `categorization-rules.json` (see Feature 3)
 - Reports: Two sections printed to shell:
@@ -62,7 +62,7 @@ Application defines the contract; adapters implement it.
 ### Adapters
 
 - **`ExcelTransactionLoader`** — Production adapter, implements `LoadTransactionsPort`
-  - Reads `input-files/export.xlsx` (hardcoded path)
+  - Reads `input-files/<export>.xlsx` (hardcoded path, historical)
   - Fixed: Bank's Excel export has corrupt `<dimension ref="A1:J33"/>` — adapter computes actual max row from cells
   - Error logging: Injects `ReportImportFailuresPort` to log parse errors to `import-failures.txt`
   

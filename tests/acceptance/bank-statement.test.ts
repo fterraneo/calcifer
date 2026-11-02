@@ -8,7 +8,7 @@ describe('Bank Statement — Acceptance', () => {
       new Transaction(new Date('2026-06-01'), 'Supermercato', '', -25.5, 'Generi alimentari', 'EUR'),
       new Transaction(new Date('2026-06-02'), 'Farmacia', '', -37.1, 'Farmacia', 'EUR'),
       new Transaction(new Date('2026-06-03'), 'Altro supermercato', '', -4.5, 'Generi alimentari', 'EUR'),
-      new Transaction(new Date('2026-06-04'), 'example-salary', '', 2000, 'Entrate', 'EUR'),
+      new Transaction(new Date('2026-06-04'), 'EXAMPLE-SALARY', '', 2000, 'Entrate', 'EUR'),
     ];
     const loader = new InMemoryTransactionLoader(transactions);
     const service = new BankStatementService(loader);

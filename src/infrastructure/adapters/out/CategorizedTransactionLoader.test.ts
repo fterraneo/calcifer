@@ -14,7 +14,7 @@ describe('CategorizedTransactionLoader', () => {
     loader = td.object<LoadTransactionsPort>();
     categorizer = td.object<CategorizeTransactionPort>();
 
-    const original = new Transaction(new Date('2024-01-01'), 'Groceries', 'example-grocer', -50, 'Alimentari', 'EUR');
+    const original = new Transaction(new Date('2024-01-01'), 'Groceries', 'EXAMPLE-SHOP', -50, 'Alimentari', 'EUR');
     td.when(loader.load()).thenResolve([original]);
     td.when(categorizer.categorize(original)).thenReturn('Grocery');
 
@@ -32,7 +32,7 @@ describe('CategorizedTransactionLoader', () => {
     categorizer = td.object<CategorizeTransactionPort>();
 
     const date = new Date('2024-06-15');
-    const original = new Transaction(date, 'example-streaming', 'Abbonamento', -12.99, 'Servizi', 'EUR');
+    const original = new Transaction(date, 'EXAMPLE-STREAMING', 'Abbonamento', -12.99, 'Servizi', 'EUR');
     td.when(loader.load()).thenResolve([original]);
     td.when(categorizer.categorize(original)).thenReturn('Recurring Payments');
 
@@ -40,7 +40,7 @@ describe('CategorizedTransactionLoader', () => {
     const [result] = await subject.load();
 
     expect(result.date).toEqual(date);
-    expect(result.description).toBe('example-streaming');
+    expect(result.description).toBe('EXAMPLE-STREAMING');
     expect(result.details).toBe('Abbonamento');
     expect(result.amount).toBe(-12.99);
     expect(result.currency).toBe('EUR');

@@ -44,9 +44,9 @@ describe('BankStatementService — Unit', () => {
 
   it('sorts results by total ascending (largest expense first)', async () => {
     td.when(mockLoader.load()).thenResolve([
-      new Transaction(new Date(), 'example-transfer', '', -500, 'Viaggi', 'EUR'),
+      new Transaction(new Date(), 'EXAMPLE-TRANSFER', '', -500, 'Viaggi', 'EUR'),
       new Transaction(new Date(), 'Bar', '', -5, 'Ristoranti', 'EUR'),
-      new Transaction(new Date(), 'example-salary', '', 2000, 'Entrate', 'EUR'),
+      new Transaction(new Date(), 'EXAMPLE-SALARY', '', 2000, 'Entrate', 'EUR'),
     ]);
 
     const result = await service.summarizeByCategory();
