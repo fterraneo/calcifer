@@ -244,7 +244,7 @@ npm run lint         # Type-check only (no emit)
 ### Git workflow
 
 **Commits:**
-- Author: `f.terraneo <f.terraneo@hotmail.com>` (via `--author` flag)
+- Commit with the repository's configured git identity (no `--author` flag; see `AGENTS.md`, `## Git`)
 - Co-author: `Co-authored-by: <MODEL NAME> <email>` in message body
 - Every commit is atomic (single logical change) and shippable (tests pass, type-check clean)
 

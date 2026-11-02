@@ -201,7 +201,7 @@ Fix in `ExcelTransactionLoader`: Compute actual max row from cells and override 
 ## Git Workflow
 
 **Commits:**
-- Author: `f.terraneo <f.terraneo@hotmail.com>`
+- Author: the repository's configured git identity (see the rule in `AGENTS.md`, `## Git`; do not pass `--author`)
 - Always include a Co-authored-by trailer with the model currently running the session; follow the rule in `AGENTS.md` (`## Git`)
 - Make small, atomic commits representing single logical changes
 - Every commit must keep the project in a production-shippable state
